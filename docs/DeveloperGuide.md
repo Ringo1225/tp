@@ -29,7 +29,7 @@ You may also wish to refer to the source code [here](https://github.com/AY2021S1
 
 ## **3. Design**
 
-In this section, we will be discussing the general design of the software. We will begin with its overall architecture to understand the high-level design of **Hospify**, followed by a closer look into each of the four major components, namely [`UI`](#ui-component), [`Logic`](#logic-component), [`Model`](#model-component) and [`Storage`](#storage-component).
+In this section, we will be discussing the general design of the software. We will begin with its overall architecture to understand the high-level design of **Hospify**, followed by a closer look into each of the four major components, namely [`UI`](#32-ui-component), [`Logic`](#33-logic-component), [`Model`](#34-model-component) and [`Storage`](#35-storage-component).
 
 ### 3.1 Architecture
 
@@ -41,14 +41,14 @@ The ***Architecture Diagram*** given above explains the high-level design of the
 * At app launch: Initializes the components in the correct sequence, and connects them up with each other.
 * At shut down: Shuts down the components and invokes cleanup methods where necessary.
 
-[**`Commons`**](#common-classes) represents a collection of classes used by multiple other components.
+[**`Commons`**](#36-common-classes) represents a collection of classes used by multiple other components.
 
 The rest of the App consists of four components.
 
-* [**`UI`**](#ui-component): The UI of the App.
-* [**`Logic`**](#logic-component): The command executor.
-* [**`Model`**](#model-component): Holds the data of the App in memory.
-* [**`Storage`**](#storage-component): Reads data from, and writes data to, the hard disk.
+* [**`UI`**](#32-ui-component): The UI of the App.
+* [**`Logic`**](#33-logic-component): The command executor.
+* [**`Model`**](#34-model-component): Holds the data of the App in memory.
+* [**`Storage`**](#35-storage-component): Reads data from, and writes data to, the hard disk.
 
 Each of the four components,
 
@@ -385,16 +385,48 @@ The following activity diagram summarizes what happens when the user inputs a co
 
 ### 4.5 Appointment feature (by Gabriel Teo Yu Xiang)
 
-The appointment feature will enable clinics to manage patient's appointments within Hospify, thus avoiding the need for spreadsheets.
-Users have the ability to show, add, delete, edit appointments within the app. 
-
 #### 4.5.1 Implementation
-##### Overview:
+
+The appointment feature will enable clinics to manage patient's appointments within Hospify, thus avoiding the need for spreadsheets.
+Users have the ability to show, add, edit and delete appointments within Hospify.
+The following are the additions required for this feature:
 
 * An `Appointment` class is created in the `patient` package.
 * A new prefix `appt/` to be used with the new `Appointment` field.
 * 4 new commands specifically for managing patients' appointments, `showAppt`, `addAppt`, `editAppt` and `deleteAppt`.
 * 3 new additional prefixes `oldappt/`, `newappt/` and `d/` to represent old appointments, new appointments, and appointment description respectively, which are to be used in the `editAppt` command.
+
+##### Overview:
+
+To understand how the `Appointment` feature can be used, let us take a look at an overview of how the `addAppt` command is implemented first.
+
+1. After the input is entered by the user, the `LogicManager#execute(String commandText)` method calls the `HospifyParser#parseCommand(String userInput)` method for Hospify to parse and interpret the user input.
+
+2. Based on `addAppt` command word, an `AddApptCommandParser` object is created and the `AddApptCommandParser#parse(String args)` method is called for the `AddApptCommandParser` to parse and interpret the arguments in the user input.
+
+3. Subsequently, an `AddApptCommand` object is created and returned as an output to the `LogicManager#execute(String commandText)` method.
+
+4. The `LogicManager#execute(String commandText)` method then calls upon the `AddApptCommand#execute(Model model)` method, which in turn calls the `Model#setPatient(Patient patient 1, Patient patient 2)` and `Model#updateFilteredPatientList(boolean true)` methods to add the new `Appointment` to the patient.
+
+5. Finally, a new `CommandResult` object is returned with a success message when the `Appointment` is added to the patient.
+
+The sequence diagram below illustrates how the operation of adding an `Appointment` works.
+
+![AddAppointmentSequenceDiagram](images/UML_Diagrams/AddAppointmentSequenceDiagram.png)<br>
+
+<div markdown="block" class="alert alert-info">
+
+**:information_source: Note on sequence diagram:**<br>
+
+* The lifeline for `AddApptCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
+
+* For simplicity, the complete line of user input for the `addAppt` command is omitted, originally referring to `S1234567A appt/28/09/2022 20:00 d/Eye Check-up`, which is further simplified to `... appt/DATE TIME` in the sequence diagram.
+
+* Similarly, `patient 1` and `patient 2` represent the `Patient` object before and after adding the `Appointment` respectively, and `PREDICATE_SHOW_ALL_PATIENTS` has been simplified to `true` in the sequence diagram, since it is always evaluated to `true` in its implementation.
+
+* The steps above illustrate a typical successful execution of the `addAppt` command. In the usage scenario below, we will summarise all other commands related to the `Appointment` feature.
+
+</div>
 
 Given below is an example usage scenario using a Patient with `NRIC` **S1234567A**.
 
